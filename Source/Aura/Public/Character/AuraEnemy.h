@@ -22,7 +22,8 @@ public:
 
 	// IEnemyInterface을(를) 통해 상속됨
 	void HighlightActor() override;
-
 	void UnhighlightActor() override;
 
+protected:
+	virtual void BeginPlay() override;
 };
