@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
+
 #include "AuraCharacter.generated.h"
 
 /**
@@ -19,6 +20,9 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+
+	// ICombatInterface을(를) 통해 상속됨
+	virtual int32 GetPlayerLevel() override;
 
 protected:
 	virtual void InitAbilityActorInfo() override;

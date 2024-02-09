@@ -108,6 +108,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitChance, Category = "Secondary Attribures")
 	FGameplayAttributeData CriticalHitChance;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitChance)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitResistance, Category = "Secondary Attribures")
+	FGameplayAttributeData CriticalHitResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitResistance)
 		
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitDamage, Category = "Secondary Attribures")
 	FGameplayAttributeData CriticalHitDamage;
@@ -158,6 +162,9 @@ public:
 	UFUNCTION()
 	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const;
 
+	UFUNCTION()
+	void OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const;
+	
 	UFUNCTION()
 	void OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const;
 
