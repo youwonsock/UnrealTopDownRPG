@@ -13,6 +13,10 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+//// FGameplayAttribute : return type
+//// FAttributeSignature : delegate
+//DECLARE_DELEGATE_RetVal(FGameplayAttribute, FAttributeSignature)
+
 USTRUCT()
 struct FEffectProperties
 {
@@ -47,6 +51,13 @@ struct FEffectProperties
 	ACharacter* TargetCharacter = nullptr;
 };
 
+// typedef는 template 형식을 사용할 수 없음(형식이 한정)
+//typedef TBaseStaticDelegateInstance<FGameplayAttribute(), FDefaultDelegateUserPolicy>::FFuncPtr AttributeFuncPtr;
+
+// 모던 C++의 방식으로 template 형식이여도 typedef를 사용할 수 있음
+template<class T>
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
 /**
  * 
  */
@@ -57,6 +68,9 @@ class AURA_API UAuraAttributeSet : public UAttributeSet
 	
 public:
 	UAuraAttributeSet();
+
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
+
 
 	// primary attributes (rpg에서 주로 사용)
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "Primary Attribures")
@@ -179,6 +193,8 @@ public:
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
+
+
 
 private:
 	void SetEffectProperties(FEffectProperties& Props, const FGameplayEffectModCallbackData& Data) const;
