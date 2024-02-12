@@ -38,3 +38,33 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		Projectile->FinishSpawning(SpawnTransform);
 	}
 }
+
+void UAuraProjectileSpell::SpawnProjectile()
+{
+	const bool bIsServer = GetAvatarActorFromActorInfo()->HasAuthority();
+
+	if (!bIsServer)
+		return;
+
+	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
+	if (CombatInterface)
+	{
+		const FVector SocketLocation = CombatInterface->GetCombatSocketLocation();
+
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(SocketLocation);
+
+		// todo set the rotation of the projectile
+
+		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+			ProjectileClass
+			, SpawnTransform
+			, GetOwningActorFromActorInfo()
+			, Cast<APawn>(GetOwningActorFromActorInfo())
+			, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+		// todo give the projectile a gameplay effect spec for causing damage
+
+		Projectile->FinishSpawning(SpawnTransform);
+	}
+}
