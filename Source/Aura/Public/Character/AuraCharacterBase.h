@@ -25,7 +25,11 @@ public:
 
 	// IAbilitySystemInterface을(를) 통해 상속됨
 	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
 	UAttributeSet* GetAttributeSet() const;
+
+	// ICombatInterface을(를) 통해 상속됨
+	virtual FVector GetCombatSocketLocation() override;
 protected:
 	virtual void BeginPlay() override;
 
@@ -40,6 +44,9 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName WeaponTipSocketName;
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

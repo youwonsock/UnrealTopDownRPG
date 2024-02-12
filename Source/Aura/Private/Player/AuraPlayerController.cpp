@@ -7,12 +7,18 @@
 #include "Input/AuraInputComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Components/SplineComponent.h"
+#include "AuraGameplayTags.h"
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
 
 #include "Interaction/EnemyInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+
+	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -20,7 +26,28 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace();
+	AutoRun();
 }
+
+void AAuraPlayerController::AutoRun()
+{
+	if(!bAutoRunnig)
+		return;
+
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination < AutoRunAcceptanceRadius)
+		{
+			bAutoRunnig = false;
+		}
+	}
+}
+
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
@@ -83,7 +110,6 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::CursorTrace()
 {
-	FHitResult CursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 
 	if (!CursorHit.bBlockingHit)
@@ -92,74 +118,147 @@ void AAuraPlayerController::CursorTrace()
 	LastActor = ThisActor;
 	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
 
-	/**
-	* Line trace from cursor. There are several scenarios:
-	*	A. LastActor is nullptr and ThisActor is nullptr
-	*		- Do nothing
-	*	B. LastActor is nullptr and ThisActor is valid
-	*		- Highlight ThisActor
-	*   C. LastActor is valid and ThisActor is nullptr
-	*       - Unhighlight LastActor
-	*   D. LastActor is valid and ThisActor is valid, but LastActor != ThisActor
-	*       - Unhighlight LastActor, Highlight ThisActor
-	*   E. LastActor is valid and ThisActor is valid, and LastActor == ThisActor
-	*       - Do nothing
-	*/
-
-	if (LastActor == nullptr)
+	if (LastActor != ThisActor)
 	{
-		if (ThisActor != nullptr)
-		{
-			// Case B
-			ThisActor->HighlightActor();
-		}
-		else
-		{
-			// Case A
-			// Do nothing
-		}
-	}
-	else
-	{
-		if (ThisActor == nullptr)
-		{
-			// Case C
+		if (LastActor)
 			LastActor->UnhighlightActor();
-		}
-		else
-		{
-			if (LastActor != ThisActor)
-			{
-				// Case D
-				LastActor->UnhighlightActor();
-				ThisActor->HighlightActor();
-			}
-			else
-			{
-				// Case E
-				// Do nothing
-			}
-		}
+
+		if (ThisActor)
+			ThisActor->HighlightActor();
 	}
+
+#pragma region origin
+	///**
+	//* Line trace from cursor. There are several scenarios:
+	//*	A. LastActor is nullptr and ThisActor is nullptr
+	//*		- Do nothing
+	//*	B. LastActor is nullptr and ThisActor is valid
+	//*		- Highlight ThisActor
+	//*   C. LastActor is valid and ThisActor is nullptr
+	//*       - Unhighlight LastActor
+	//*   D. LastActor is valid and ThisActor is valid, but LastActor != ThisActor
+	//*       - Unhighlight LastActor, Highlight ThisActor
+	//*   E. LastActor is valid and ThisActor is valid, and LastActor == ThisActor
+	//*       - Do nothing
+	//*/
+
+	//if (LastActor == nullptr)
+	//{
+	//	if (ThisActor != nullptr)
+	//	{
+	//		// Case B
+	//		ThisActor->HighlightActor();
+	//	}
+	//	else
+	//	{
+	//		// Case A
+	//		// Do nothing
+	//	}
+	//}
+	//else
+	//{
+	//	if (ThisActor == nullptr)
+	//	{
+	//		// Case C
+	//		LastActor->UnhighlightActor();
+	//	}
+	//	else
+	//	{
+	//		if (LastActor != ThisActor)
+	//		{
+	//			// Case D
+	//			LastActor->UnhighlightActor();
+	//			ThisActor->HighlightActor();
+	//		}
+	//		else
+	//		{
+	//			// Case E
+	//			// Do nothing
+	//		}
+	//	}
+	//}
+#pragma endregion
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, FString::Printf(TEXT("AbilityInputTagPressed: %s"), *InputTag.ToString()));
+
+	if (InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		bTargeting  = ThisActor != nullptr ? true : false;
+		bAutoRunnig = false;
+	}
+
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetASC() == nullptr)
-		return;
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC())
+			GetASC()->AbilityInputTagReleased(InputTag);
 
-	GetASC()->AbilityInputTagReleased(InputTag);
+		return;
+	}
+
+	if (bTargeting)
+	{
+		if (GetASC())
+			GetASC()->AbilityInputTagReleased(InputTag);
+	}
+	else
+	{
+		const APawn* ControlledPawn = GetPawn<APawn>();
+
+		if (FollowTime <= ShortPressThreshold && ControlledPawn)
+		{
+			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
+			{
+				Spline->ClearSplinePoints();
+				for (const FVector& PointLoc : NavPath->PathPoints)
+					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
+
+				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1]; 
+				bAutoRunnig = true;
+			}
+		}
+
+		FollowTime = 0.0f;
+		bTargeting = false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (GetASC() == nullptr)
-		return;
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
+	{
+		if (GetASC())
+			GetASC()->AbilityInputTagHeld(InputTag);
 
-	GetASC()->AbilityInputTagHeld(InputTag);
+		return;
+	}
+
+	if (bTargeting)
+	{
+		if (GetASC())
+			GetASC()->AbilityInputTagHeld(InputTag);
+	}
+	else
+	{
+		FollowTime += GetWorld()->GetDeltaSeconds();
+
+		if (CursorHit.bBlockingHit)
+			CachedDestination = CursorHit.ImpactPoint;
+
+		if (APawn* ControlledPawn = GetPawn<APawn>())
+		{
+			if (FollowTime > ShortPressThreshold)
+			{
+				const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+
+				ControlledPawn->AddMovementInput(WorldDirection);
+			}
+		}
+	}
 }
