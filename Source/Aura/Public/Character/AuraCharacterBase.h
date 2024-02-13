@@ -61,7 +61,7 @@ protected:
 	TSubclassOf<UGameplayEffect> DefaultSecondaryAttribute;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> DefaultVitalAttrubute;
+	TSubclassOf<UGameplayEffect> DefaultVitalAttribute;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")

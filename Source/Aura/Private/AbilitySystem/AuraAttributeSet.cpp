@@ -169,6 +169,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));	
+		UE_LOG(LogTemp, Warning, TEXT("Health : %f, Name : %s"), GetHealth(), *Props.TargetAvatarActor->GetName());
 	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
@@ -210,7 +211,7 @@ void UAuraAttributeSet::SetEffectProperties(FEffectProperties& Props, const FGam
 		// get target actor
 		Props.TargetAvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
 		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
-		Props.TargetCharacter = Cast<ACharacter>(Props.TargetController->GetPawn());
+		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
 	}
