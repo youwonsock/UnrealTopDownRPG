@@ -42,5 +42,5 @@ public:
 	TSubclassOf<UGameplayEffect> VitalAttributes;
 
 public:
-	FCharacterClassDefaultInfo GetClassDefaults(ECharacterClass CharacterClass) const;
+	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass) const;
 };

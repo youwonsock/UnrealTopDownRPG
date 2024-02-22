@@ -30,16 +30,6 @@ public:
 
 	// ICombatInterface을(를) 통해 상속됨
 	virtual FVector GetCombatSocketLocation() override;
-protected:
-	virtual void BeginPlay() override;
-
-	virtual void InitAbilityActorInfo();
-
-	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
-
-	void InitializeDefaultAttributes() const;
-
-	void AddCharacterAbilities() const;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -62,6 +52,17 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> DefaultVitalAttribute;
+
+protected:
+	virtual void BeginPlay() override;
+
+	virtual void InitAbilityActorInfo();
+
+	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level) const;
+
+	virtual void InitializeDefaultAttributes() const;
+
+	void AddCharacterAbilities() const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
