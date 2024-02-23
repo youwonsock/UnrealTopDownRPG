@@ -31,6 +31,7 @@ public:
 	// ICombatInterface을(를) 통해 상속됨
 	virtual FVector GetCombatSocketLocation() override;
 
+	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 protected:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
@@ -68,4 +69,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TObjectPtr<UAnimMontage> HitReactMontage;
 };

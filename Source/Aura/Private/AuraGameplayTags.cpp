@@ -25,6 +25,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Primary.Vigor")
 		, FString("Increases Health"));
 
+
+
 	//Secondary Attributes
 	GameplayTags.Attributes_Secondary_Armor = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Secondary.Armor"),
@@ -76,6 +78,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Maximum amount of Mana obtainable")
 	);
 
+
+
+	// effects tags
+	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Effects.HitReact"),
+		FString("Tag granted when hit reacting")
+	);
+
 	// input tags
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("InputTag.LMB"),
@@ -107,4 +117,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Input Tag for Key4")
 	);
 
+
+
+	// meta tags
+	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Damage"),
+		FString("Damage Type")
+	);
 }

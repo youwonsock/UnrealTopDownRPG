@@ -33,6 +33,9 @@ public:
 	FGameplayTag Attributes_Secondary_MaxHealth;
 	FGameplayTag Attributes_Secondary_MaxMana;
 
+	// effects tags
+	FGameplayTag Effects_HitReact;
+
 	// Input Tags
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;
@@ -41,6 +44,9 @@ public:
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
 	
+	// meta tags
+	FGameplayTag Damage;
+
 private:
 	static FAuraGameplayTags GameplayTags;
 };
