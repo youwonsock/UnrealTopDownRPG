@@ -6,6 +6,7 @@
 #include "GameplayEffectExtension.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Interaction/CombatInterface.h"
 
 #include "AuraGameplayTags.h"
 
@@ -196,7 +197,10 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Dead"));
+				ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor);
+
+				if (CombatInterface)
+					CombatInterface->Die();
 			}
 		}
 	}

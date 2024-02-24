@@ -30,6 +30,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	float BaseWalkSpeed = 250.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	float LifeSpan = 5.0f;
+
 public:
 	AAuraEnemy();
 
@@ -39,6 +42,7 @@ public:
 
 	// ICombatInterface을(를) 통해 상속됨
 	virtual int32 GetPlayerLevel() override;
+	virtual void Die() override;
 
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
