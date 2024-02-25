@@ -9,6 +9,7 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Interaction/CombatInterface.h"
+#include "Aura/Public/AuraAbilityType.h"
 
 struct AuraDamageStatics
 {
@@ -58,7 +59,15 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	EvaluationParameters.TargetTags = TargetTags;
 
 	// get damage set by caller 
-	float Damage = Spec.GetSetByCallerMagnitude(FAuraGameplayTags::Get().Damage);
+
+	float Damage = 0;
+
+	for(const TTuple<FGameplayTag, FGameplayTag>& Pair: FAuraGameplayTags::Get().DamageTypesToResistances)
+	{
+		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key);
+		Damage += DamageTypeValue;
+	}
+
 
 	// Capture blockchance on target, and determine if there was a successful block
 	float TargetBlockChance = 0.f;
@@ -66,6 +75,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	TargetBlockChance = FMath::Max<float>(0.f, TargetBlockChance);
 
 	const bool bIsBlocked = FMath::RandRange(1,100) <= TargetBlockChance;
+
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+
+	UAuraAbilitySystemLibrary::SetBlockedHit(EffectContextHandle, bIsBlocked);
+
 
 	// if blocked, damage is 0
 	Damage = bIsBlocked ? 0.f : Damage;
